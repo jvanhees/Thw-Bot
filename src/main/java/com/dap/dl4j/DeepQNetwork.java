@@ -38,7 +38,7 @@ public class DeepQNetwork {
 	INDArray LastInput;
 	int LastAction;
 	
-	DeepQNetwork(MultiLayerConfiguration conf , int replayMemoryCapacity , float discount , 
+	public DeepQNetwork(MultiLayerConfiguration conf , int replayMemoryCapacity , float discount ,
 			double epsilon , int batchSize , int updateFreq , int replayStartSize , int inputLength , int numActions){
 		DeepQ = new MultiLayerNetwork(conf);
 		DeepQ.init();

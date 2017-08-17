@@ -16,19 +16,19 @@ import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
 
 //import com.dap.routines.basic.SystemRoutines;
 
-public class TestRL {
+		public class TestRL {
 
-	DeepQNetwork RLNet;
-	int size = 4;
-	int scale = 3;
-	
-	float FrameBuffer[][];
-	
-	void InitNet(){
-		
-		int InputLength = size*size*2+1 ;
-		int HiddenLayerCount = 150 ;
-        MultiLayerConfiguration conf1 = new NeuralNetConfiguration.Builder()
+			DeepQNetwork RLNet;
+			int size = 4;
+			int scale = 3;
+
+			float FrameBuffer[][];
+
+			void InitNet(){
+
+				int InputLength = size*size*2+1 ;
+				int HiddenLayerCount = 150 ;
+				MultiLayerConfiguration conf1 = new NeuralNetConfiguration.Builder()
        		 .seed(123)
 	             .iterations(1)
 	             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
