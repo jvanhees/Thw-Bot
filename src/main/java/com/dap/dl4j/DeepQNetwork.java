@@ -162,17 +162,25 @@ public class DeepQNetwork {
 		
 		INDArray CurrOutputs = DeepQ.output(CurrInputs);
 		INDArray TargetOutputs = TargetDeepQ.output(TargetInputs);
-	//	float y[] = new float[replays.length];
+
+		// Loop through replays
 		for(int i = 0 ; i < replays.length ; i++){
+
+			// Create array with tick and the action
 			int ind[] = { i , replays[i].Action };
+
 			float FutureReward = 0 ;
-			if(replays[i].NextInput != null)
-				FutureReward = FindMax(TargetOutputs.getRow(i) , replays[i].NextActionMask);
+
+			if(replays[i].NextInput != null) {
+				FutureReward = FindMax(TargetOutputs.getRow(i), replays[i].NextActionMask);
+			}
+
 			float TargetReward = replays[i].Reward + Discount * FutureReward ;
+
 			TotalError += (TargetReward - CurrOutputs.getFloat(ind)) * (TargetReward - CurrOutputs.getFloat(ind));
+
 			CurrOutputs.putScalar(ind , TargetReward ) ;
 		}
-		//System.out.println("Avgerage Error: " + (TotalError / y.length) );
 		
 		DeepQ.fit(CurrInputs, CurrOutputs);
 	}

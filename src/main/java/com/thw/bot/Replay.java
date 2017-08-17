@@ -8,14 +8,12 @@ public class Replay {
     int Action;
     float Reward;
     INDArray NextInput;
-    int NextActionMask[] ;
 
-    Replay(INDArray input , int action , float reward , INDArray nextInput , int nextActionMask[]){
+    Replay( INDArray input , int action , float reward , INDArray nextInput ){
         Input = input;
         Action = action;
         Reward = reward;
         NextInput = nextInput;
-        NextActionMask = nextActionMask ;
     }
 
 }

@@ -27,9 +27,13 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
 
     private Network blaffernet;
 
-    private int hits;
+    private int learningTickInterval = 5;
+
+    private int penalty;
+
     private double[][] stateHistory;
     private int[] actionHistory;
+    private int[] rewardHistory;
 
     /**
      * run: TeamHoekscheWaardBlaffer's default behavior
@@ -52,20 +56,18 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
             int action = blaffernet.GetAction(inputArray);
             doAction(action);
 
-            stateHistory[stateHistory.length] = ownPosition;
-            actionHistory[actionHistory.length] = action;
+            // Only add learning data when we are in the tick interval
+            if (getTime() % learningTickInterval == 0) {
+                // Get reward that happened in this ticks
+                int reward = calcuteReward();
 
-            // Get reward that happened in this ticks
-            int reward = calcuteReward();
+                stateHistory[stateHistory.length] = ownPosition;
+                actionHistory[actionHistory.length] = action;
+                rewardHistory[rewardHistory.length] = reward;
 
-            // Make sure we have a history to train on
-            if (getTime() > rewardDelay) {
-                // Train our net
+                // Process this ticks reward for the action x ticks ago
+                penalty = 0;
             }
-
-            // Process this ticks reward for the action x ticks ago
-
-            hits = 0;
         }
     }
 
@@ -95,8 +97,8 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
     }
 
     public int calcuteReward() {
-        int reward = 1;
-        reward -= (hits * hitPenalty);
+        int reward = 3;
+        reward -= penalty;
         return reward;
     }
 
@@ -111,8 +113,8 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
 
     void InitNet() {
         // + 4 for own posX , posY , rotation
-        // + 4 for enemy posX , posY , rotation
-        int InputLength = 4 + 4;
+        // NOT NOW + 4 for enemy posX , posY , rotation
+        int InputLength = 4;
         int HiddenLayerCount = 150;
         MultiLayerConfiguration conf1 = new NeuralNetConfiguration.Builder()
                 .seed(123)
@@ -150,7 +152,7 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
     public void onHitByBullet(HitByBulletEvent e) {
         // Replace the next line with any behavior you would like
         // back(10);
-        hits++;
+        penalty += 2;
     }
 
     /**
@@ -159,5 +161,11 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
     public void onHitWall(HitWallEvent e) {
         // Replace the next line with any behavior you would like
         // back(20);
+        penalty += 1;
+    }
+
+    public void onBattleEnded(BattleEndedEvent e) {
+        // Train the neural network.
+        blaffernet.train(stateHistory, actionHistory, rewardHistory, rewardDelay);
     }
 }
