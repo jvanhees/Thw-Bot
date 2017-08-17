@@ -100,24 +100,12 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
         return reward;
     }
 
-    // Actions
-    // Forward
 
-
-    // Battlefield size as input
-    // int sizeX = ((int) Math.floor(getBattleFieldWidth() / battleFieldScale));
-    // int sizeY = ((int) Math.floor(getBattleFieldHeight() / battleFieldScale));
-
-    // Own position as input
-
-
-    // enemy position as input
-    int enemyX = ((int) getX() % battleFieldScale);
-    int enemyY = ((int) getY() % battleFieldScale);
-    double enemyHeading = getHeading();
-    double enemyVelocity = getVelocity();
-
-    // Enemy position
+//    // enemy position as input
+//    int enemyX = ((int) getX() % battleFieldScale);
+//    int enemyY = ((int) getY() % battleFieldScale);
+//    double enemyHeading = getHeading();
+//    double enemyVelocity = getVelocity();
 
     float FrameBuffer[][];
 
