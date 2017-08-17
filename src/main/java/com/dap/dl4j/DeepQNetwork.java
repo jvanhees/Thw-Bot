@@ -162,8 +162,8 @@ public class DeepQNetwork {
 		
 		INDArray CurrOutputs = DeepQ.output(CurrInputs);
 		INDArray TargetOutputs = TargetDeepQ.output(TargetInputs);
-		float y[] = new float[replays.length];
-		for(int i = 0 ; i < y.length ; i++){
+	//	float y[] = new float[replays.length];
+		for(int i = 0 ; i < replays.length ; i++){
 			int ind[] = { i , replays[i].Action };
 			float FutureReward = 0 ;
 			if(replays[i].NextInput != null)

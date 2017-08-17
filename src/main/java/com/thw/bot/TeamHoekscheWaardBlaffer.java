@@ -1,5 +1,5 @@
 package com.thw.bot;
-import com.dap.dl4j.DeepQNetwork;
+
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -7,6 +7,8 @@ import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import robocode.*;
 
@@ -16,52 +18,114 @@ import robocode.*;
 /**
  * TeamHoekscheWaardBlaffer - a robot by (your name here)
  */
-public class TeamHoekscheWaardBlaffer extends AdvancedRobot
-{
+public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
+
+    private int battleFieldScale = 36;
+    private int hitPenalty = 2;
+    // Rewards get added to action 10 ticks ago
+    private int rewardDelay = 10;
+
+    private Network blaffernet;
+
+    private int hits;
+    private double[][] stateHistory;
+    private int[] actionHistory;
+
     /**
      * run: TeamHoekscheWaardBlaffer's default behavior
      */
     public void run() {
+        // set up the neural network
+        InitNet();
+
         // Initialization of the robot should be put here
         // After trying out your robot, try uncommenting the import at the top,
         // and the next line:
 
+        while (true) {
+            // Gameloop
+            double[] ownPosition = getOwnPosition();
 
-        // set up the neural network
-        InitNet();
+            INDArray inputArray = Nd4j.create(ownPosition );
 
+            // Get action from net
+            int action = blaffernet.GetAction(inputArray);
+            doAction(action);
 
-        while(true) {
+            stateHistory[stateHistory.length] = ownPosition;
+            actionHistory[actionHistory.length] = action;
 
-            ahead(100);
-            turnGunRight(360);
-            back(100);
-            turnGunRight(360);
+            // Get reward that happened in this ticks
+            int reward = calcuteReward();
 
+            // Make sure we have a history to train on
+            if (getTime() > rewardDelay) {
+                // Train our net
+            }
 
+            // Process this ticks reward for the action x ticks ago
 
+            hits = 0;
         }
     }
 
+    public double[] getOwnPosition() {
+        double ownX = getX() % battleFieldScale;
+        double ownY = getY() % battleFieldScale;
+        double ownHeading = getHeading();
+        double ownVelocity = getVelocity();
+
+        return new double[]{ownX, ownY, ownHeading, ownVelocity};
+    }
+
+    public void doAction(int action) {
+        switch (action) {
+            case 0:
+                ahead(100);
+                break;
+            case 1:
+                back(100);
+                break;
+            case 2:
+                turnRight(360);
+                break;
+            case 3:
+                turnLeft(360);
+        }
+    }
+
+    public int calcuteReward() {
+        int reward = 1;
+        reward -= (hits * hitPenalty);
+        return reward;
+    }
+
+    // Actions
+    // Forward
 
 
+    // Battlefield size as input
+    // int sizeX = ((int) Math.floor(getBattleFieldWidth() / battleFieldScale));
+    // int sizeY = ((int) Math.floor(getBattleFieldHeight() / battleFieldScale));
+
+    // Own position as input
 
 
+    // enemy position as input
+    int enemyX = ((int) getX() % battleFieldScale);
+    int enemyY = ((int) getY() % battleFieldScale);
+    double enemyHeading = getHeading();
+    double enemyVelocity = getVelocity();
 
-
-
-
-
-    DeepQNetwork RLNet;
-    int size = 4;
-    int scale = 3;
+    // Enemy position
 
     float FrameBuffer[][];
 
-    void InitNet(){
-
-        int InputLength = size*size*2+1 ;
-        int HiddenLayerCount = 150 ;
+    void InitNet() {
+        // + 4 for own posX , posY , rotation
+        // + 4 for enemy posX , posY , rotation
+        int InputLength = 4 + 4;
+        int HiddenLayerCount = 150;
         MultiLayerConfiguration conf1 = new NeuralNetConfiguration.Builder()
                 .seed(123)
                 .iterations(1)
@@ -80,16 +144,8 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot
                 .pretrain(false).backprop(true).build();
 
 
-        RLNet = new DeepQNetwork(conf1 ,  100000 , .99f , 1d , 1024 , 500 , 1024 , InputLength , 4);
+        blaffernet = new Network(conf1, 100000, .99f, 1d, 1024, 500, 1024, InputLength, 4);
     }
-
-
-
-
-
-
-
-
 
 
     /**
@@ -97,7 +153,7 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot
      */
     public void onScannedRobot(ScannedRobotEvent e) {
         // Replace the next line with any behavior you would like
-        fire(1);
+        // fire(1);
     }
 
     /**
@@ -105,7 +161,8 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot
      */
     public void onHitByBullet(HitByBulletEvent e) {
         // Replace the next line with any behavior you would like
-        back(10);
+        // back(10);
+        hits++;
     }
 
     /**
@@ -113,6 +170,6 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot
      */
     public void onHitWall(HitWallEvent e) {
         // Replace the next line with any behavior you would like
-        back(20);
+        // back(20);
     }
 }

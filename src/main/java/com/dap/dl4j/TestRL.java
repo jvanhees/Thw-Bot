@@ -16,36 +16,35 @@ import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
 
 //import com.dap.routines.basic.SystemRoutines;
 
-		public class TestRL {
+public class TestRL {
 
-			DeepQNetwork RLNet;
-			int size = 4;
-			int scale = 3;
+	DeepQNetwork RLNet;
+	int size = 4;
+	int scale = 3;
 
-			float FrameBuffer[][];
+	float FrameBuffer[][];
 
-			void InitNet(){
+	void InitNet(){
 
-				int InputLength = size*size*2+1 ;
-				int HiddenLayerCount = 150 ;
-				MultiLayerConfiguration conf1 = new NeuralNetConfiguration.Builder()
-       		 .seed(123)
-	             .iterations(1)
-	             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-	             .learningRate(0.0025)
-	             .updater(Updater.NESTEROVS).momentum(0.95)
-	             .list()
-	             .layer(0, new DenseLayer.Builder().nIn(InputLength).nOut(HiddenLayerCount)
-	            		 	.weightInit(WeightInit.XAVIER)
-		                        .activation("relu")
-		                        .build())
-	             .layer(1, new OutputLayer.Builder(LossFunction.MSE)
-	                        .weightInit(WeightInit.XAVIER)
-	                        .activation("identity").weightInit(WeightInit.XAVIER)
-	                        .nIn(HiddenLayerCount).nOut(4).build())
-	             .pretrain(false).backprop(true).build();
-		
-		
+		int InputLength = size*size*2+1 ;
+		int HiddenLayerCount = 150 ;
+		MultiLayerConfiguration conf1 = new NeuralNetConfiguration.Builder()
+				.seed(123)
+				.iterations(1)
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+				.learningRate(0.0025)
+				.updater(Updater.NESTEROVS).momentum(0.95)
+				.list()
+				.layer(0, new DenseLayer.Builder().nIn(InputLength).nOut(HiddenLayerCount)
+						.weightInit(WeightInit.XAVIER)
+						.activation("relu")
+						.build())
+				.layer(1, new OutputLayer.Builder(LossFunction.MSE)
+						.weightInit(WeightInit.XAVIER)
+						.activation("identity").weightInit(WeightInit.XAVIER)
+						.nIn(HiddenLayerCount).nOut(4).build())
+				.pretrain(false).backprop(true).build();
+
 		RLNet = new DeepQNetwork(conf1 ,  100000 , .99f , 1d , 1024 , 500 , 1024 , InputLength , 4);
 	}
 	
