@@ -164,8 +164,16 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
         penalty += 1;
     }
 
-    public void onBattleEnded(BattleEndedEvent e) {
+    public void onRoundEnded(RoundEndedEvent e) {
         // Train the neural network.
         blaffernet.train(stateHistory, actionHistory, rewardHistory, rewardDelay);
+
+        if (e.getRound() % 10 == 0) {
+            blaffernet.ReconcileNetworks();
+        }
+    }
+
+    public void onBattleEnded(BattleEndedEvent e) {
+        blaffernet.SaveNetwork("config.json", "layers.cfg");
     }
 }

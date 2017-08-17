@@ -1,10 +1,14 @@
 package com.thw.bot;
 
+import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -14,7 +18,8 @@ public class Network {
     private MultiLayerNetwork DeepQ;
     private MultiLayerNetwork TargetDeepQ;
     // Double that defines the chance of a random action
-    private double Epsilon;
+    private float discount;
+    private double epsilon;
     private Random r;
     private int numActions;
     private int inputLength;
@@ -28,7 +33,8 @@ public class Network {
         TargetDeepQ.init();
         TargetDeepQ.setParams(DeepQ.params());
 
-        Epsilon = epsilon;
+        this.discount = discount;
+        this.epsilon = epsilon;
         r = new Random();
         inputLength = inputLength;
         numActions = numActions;
@@ -38,7 +44,7 @@ public class Network {
         INDArray outputs = DeepQ.output(Inputs);
         System.out.print(outputs + " ");
 
-        if(Epsilon > r.nextDouble()) {
+        if(epsilon > r.nextDouble()) {
             // Return random action
             return r.nextInt(outputs.size(1));
         }
@@ -61,6 +67,18 @@ public class Network {
         }
 
         return action;
+    }
+
+    float FindMaxCertainty(INDArray outputs){
+        float max = outputs.getFloat(0);
+
+        for (int i = 1; i < outputs.length(); i++) {
+            if (outputs.getFloat(i) > max) {
+                max = outputs.getFloat(i);
+            }
+        }
+
+        return max;
     }
 
     INDArray CombineInputs(double[][] states) {
@@ -95,17 +113,82 @@ public class Network {
         INDArray currOutputs = DeepQ.output(inputs);
         INDArray targetOutputs = TargetDeepQ.output(targetInputs);
 
+        float TotalError = 0;
+
         for (int i = 0; i < actionHistory.length; i++) {
             state = stateHistory[i];
             action = actionHistory[i];
             reward = rewardHistory[i + delay];
 
-            
+            int ind[] = { i , action };
 
+            float futureCertainty = 0;
+            futureCertainty = FindMaxCertainty(targetOutputs.getRow(i));
 
+            float TargetReward = reward + discount * futureCertainty;
 
+            TotalError += (TargetReward - currOutputs.getFloat(ind)) * (TargetReward - currOutputs.getFloat(ind));
 
+            currOutputs.putScalar(ind , TargetReward );
         }
+        //System.out.println("Avgerage Error: " + (TotalError / y.length) );
+
+        DeepQ.fit(inputs, currOutputs);
+    }
+
+    void ReconcileNetworks(){
+        TargetDeepQ.setParams(DeepQ.params());
+    }
+
+    public boolean SaveNetwork(String ConfFileName , String LayersFileName){
+        //Write the network parameters:
+        try{
+            DataOutputStream dos = new DataOutputStream(Files.newOutputStream(Paths.get(ConfFileName)));
+            Nd4j.write(DeepQ.params(),dos);
+        } catch (IOException e) {
+            System.out.println("Failed to write config");
+            return false;
+        }
+
+        //Write the network configuration:
+        try {
+            FileUtils.write(new File(LayersFileName), DeepQ.getLayerWiseConfigurations().toJson());
+        } catch (IOException e) {
+            System.out.println("Failed to write layers");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean LoadNetwork(String ConfFileName, String LayersFileName){
+        //Load network configuration from disk:
+        MultiLayerConfiguration confFromJson;
+        try {
+            confFromJson = MultiLayerConfiguration.fromJson(FileUtils.readFileToString(new File(ConfFileName)));
+        } catch (IOException e1) {
+            System.out.println("Failed to load config");
+            return false;
+        }
+
+        //Load parameters from disk:
+        INDArray newParams;
+        try{
+            DataInputStream dis = new DataInputStream(new FileInputStream(LayersFileName));
+            newParams = Nd4j.read(dis);
+        } catch (FileNotFoundException e) {
+            System.out.println("Failed to load layers");
+            return false;
+        } catch (IOException e) {
+            System.out.println("Failed to load layers");
+            return false;
+        }
+        //Create a MultiLayerNetwork from the saved configuration and parameters
+        DeepQ = new MultiLayerNetwork(confFromJson);
+        DeepQ.init();
+        DeepQ.setParameters(newParams);
+        ReconcileNetworks();
+        return true;
+
     }
 
 }

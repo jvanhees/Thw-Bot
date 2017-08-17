@@ -198,7 +198,7 @@ public class DeepQNetwork {
 	    	System.out.println("Failed to write params");
 			return false;
 		}
-	    
+
 	    //Write the network configuration:
 	    try {
 			FileUtils.write(new File(JSONFileName), DeepQ.getLayerWiseConfigurations().toJson());
