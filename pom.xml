@@ -19,7 +19,7 @@
     </build>
     <packaging>jar</packaging>
 
-  <name>qnetworkbot</name>
+  <name>TeamHoekscheWaardBlaffer</name>
   <url>http://maven.apache.org</url>
 
   <properties>
