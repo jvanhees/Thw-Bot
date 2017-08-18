@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
 
-public class Network {
+public class NetworkInterface {
 
     // The network itself
     private MultiLayerNetwork DeepQ;
@@ -24,8 +24,8 @@ public class Network {
     private int numActions;
     private int inputLength;
 
-    public Network(MultiLayerConfiguration conf , int replayMemoryCapacity , float discount ,
-        double epsilon , int batchSize , int updateFreq , int replayStartSize , int inputLength , int numActions) {
+    public NetworkInterface(MultiLayerConfiguration conf , int replayMemoryCapacity , float discount ,
+                            double epsilon , int batchSize , int updateFreq , int replayStartSize , int inputLength , int numActions) {
 
         DeepQ = new MultiLayerNetwork(conf);
         DeepQ.init();

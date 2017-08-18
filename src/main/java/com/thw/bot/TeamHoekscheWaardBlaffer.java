@@ -21,11 +21,10 @@ import robocode.*;
 public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
 
     private int battleFieldScale = 36;
-    private int hitPenalty = 2;
     // Rewards get added to action 10 ticks ago
     private int rewardDelay = 10;
 
-    private Network blaffernet;
+    private NetworkInterface blaffernet;
 
     private int learningTickInterval = 5;
 
@@ -34,6 +33,8 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
     private double[][] stateHistory;
     private int[] actionHistory;
     private int[] rewardHistory;
+
+
 
     /**
      * run: TeamHoekscheWaardBlaffer's default behavior
@@ -134,7 +135,7 @@ public class TeamHoekscheWaardBlaffer extends AdvancedRobot {
                 .pretrain(false).backprop(true).build();
 
 
-        blaffernet = new Network(conf1, 100000, .99f, 1d, 1024, 500, 1024, InputLength, 4);
+        blaffernet = new NetworkInterface(conf1, 100000, .99f, 1d, 1024, 500, 1024, InputLength, 4);
     }
 
 
