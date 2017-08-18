@@ -52,12 +52,6 @@
 
   <dependencies>
       <dependency>
-          <groupId>org.deeplearning4j</groupId>
-          <artifactId>deeplearning4j-core</artifactId>
-          <version>0.9.1</version>
-      </dependency>
-
-      <dependency>
           <groupId>net.sf.robocode</groupId>
           <artifactId>robocode.api</artifactId>
           <version>1.9.2.1</version>

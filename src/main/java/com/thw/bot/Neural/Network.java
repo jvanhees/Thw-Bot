@@ -237,6 +237,24 @@ public class Network
     }
 
     /**
+     * Sets the weights of all layers
+     * @returns weights The weights. Every layer needs a 2-dimensional weight array
+     * @throws Exception If the number of weight sets doesn't fit
+     */
+    public double[][][] getWeights() throws Exception
+    {
+        double[][][] ret = new double[layers.length][][];
+
+        for(int i=0; i<layers.length; i++) {
+            ret[i] = layers[i].getWeights();
+        }
+
+        return ret;
+    }
+
+
+
+    /**
      * Sets the weights of a given layer
      * @param layer Index of the layer of which the weights should be set
      * @param weights The weights for the layer
@@ -281,89 +299,4 @@ public class Network
         return result.toString();
     }
 
-
-
-    //Test everything!
-    public static void main(String[] args) throws Exception
-    {
-        /**
-         * This example is based on Brandon Rohrer's "How Deep Neural Networks Work"
-         * https://www.youtube.com/watch?v=ILsA4nyG7I0
-         * or
-         * https://brohrer.github.io/how_neural_networks_work.html
-         * Check it out. It's a great explanation how neural networks work.
-         *
-         * Input:
-         * The network takes a 4 pixel image
-         *  0 1
-         *  3 4  = {0, 1, 2, 3}
-         * With values between -1 and 1
-         *
-         * Output:
-         * It outputs a 1 in the corresponding output neuron if the image is solid,
-         * or if there is a vertical, diagonal or horizontal line
-         * {solid, vertical, diagonal, horizontal}
-         */
-
-        //4 inputs, 4 layers with 4, 4, 8, 4 neurons
-        Network net = new Network(4, new int[]{4, 4, 8, 4},
-                new int[]{Layer.ACTIVATION_TANH, Layer.ACTIVATION_TANH,
-                        Layer.ACTIVATION_RECTIFIED_LINEAR_UNIT, Layer.ACTIVATION_NONE});
-
-        //Randomize all weights
-        net.seedWeights(-1, 1);
-        System.out.println(net);
-
-
-        //Train or set the weights manually
-        double[][] train_input = new double[][]{{ 1,  1,  1,  1},
-                {-1, -1, -1, -1},
-                {-1,  1,  1, -1},
-                { 1, -1, -1,  1},
-                { 1, -1,  1, -1},
-                {-1,  1, -1,  1},
-                { 1,  1, -1, -1},
-                {-1, -1,  1,  1}};
-        double[][] train_output = new double[][]{{1, 0, 0, 0},
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, 1, 0},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1},
-                {0, 0, 0, 1}};
-
-//    net.setWeights(0, new double[][]{{ 1,  0,  1,  0},
-//                                      { 0,  1,  0,  1},
-//                                      { 0,  1,  0, -1},
-//                                      { 1,  0, -1,  0}});
-//    net.setWeights(1, new double[][]{{ 1, -1,  0,  0},
-//                                      { 1,  1,  0,  0},
-//                                      { 0,  0,  1,  1},
-//                                      { 0,  0, -1, 1}});
-//    net.setWeights(2, new double[][]{{ 1, -1,  0,  0,  0,  0,  0,  0},
-//                                      { 0,  0,  1, -1,  0,  0,  0,  0},
-//                                      { 0,  0,  0,  0,  1, -1,  0,  0},
-//                                      { 0,  0,  0,  0,  0,  0,  1, -1}});
-//    net.setWeights(3, new double[][]{{ 1,  0,  0,  0},
-//                                      { 1,  0,  0,  0},
-//                                      { 0,  1,  0,  0},
-//                                      { 0,  1,  0,  0},
-//                                      { 0,  0,  1,  0},
-//                                      { 0,  0,  1,  0},
-//                                      { 0,  0,  0,  1},
-//                                      { 0,  0,  0,  1}});
-
-
-        //Train the network
-        net.train(100, 0.00001, 0.5, -1, 1, train_input, train_output);
-
-        System.out.println("\n" + net);
-        System.out.println("Costs: " + net.cost(train_input, train_output));
-
-        //Show the input and the resulting output
-        for(double[] input : train_input)
-            System.out.println(Arrays.toString(input) + ": " +
-                    Arrays.toString(net.calculate(input)));
-    }
 }
